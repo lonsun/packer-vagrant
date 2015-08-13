@@ -1,0 +1,67 @@
+{
+    "builders": [{
+        "name": "centos-5.11-x86_64-with-chef-virtualbox-iso",
+        "type": "virtualbox-iso",
+        "headless": false,
+
+        "guest_os_type": "RedHat_64",
+        "hard_drive_interface": "sata",
+        "disk_size": 40960,
+
+        "iso_urls": [
+            "http://mirror.chpc.utah.edu/pub/centos/5.11/isos/x86_64/CentOS-5.11-x86_64-bin-DVD-1of2.iso",
+            "http://mirror.pac-12.org/5.11/isos/x86_64/CentOS-5.11-x86_64-bin-DVD-1of2.iso",
+            "http://repos.redrockhost.com/centos/5.11/isos/x86_64/CentOS-5.11-x86_64-bin-DVD-1of2.iso"
+        ],
+        "iso_checksum": "ebd77f2fdfac8da04f31c508905cf52aa62937cc",
+        "iso_checksum_type": "sha1",
+
+        "http_directory": "http",
+
+        "boot_command": [
+            "<wait>",
+            "linux ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/kickstart.cfg",
+            "<enter>"
+        ],
+        "boot_wait": "5s",
+
+        "ssh_username": "vagrant",
+        "ssh_password": "vagrant",
+        "ssh_port": 22,
+
+        "vboxmanage": [
+            ["modifyvm", "{{.Name}}", "--memory", "512"],
+            ["modifyvm", "{{.Name}}", "--cpus", "1"]
+        ],
+
+        "shutdown_command": "echo 'vagrant'|sudo -S /sbin/halt -h -p"
+    }],
+    "post-processors": [{
+        "type": "vagrant",
+        "keep_input_artifact": false,
+        "output": "build/centos-5.11-x86_64-with-chef.box"
+
+    },
+    {
+        "type": "atlas",
+        "only": ["centos-5.11-x86_64-with-chef-virtualbox-iso"],
+        "keep_input_artifact": false,
+        "artifact": "lonsun/centos-5.11-x86_64-with-chef",
+        "artifact_type": "vagrant.box",
+        "metadata": {
+            "provider": "virtualbox",
+            "version": "0.1.0"
+        }
+    }],
+    "provisioners": [{
+        "type": "shell",
+        "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash '{{.Path}}'",
+        "scripts": [
+            "scripts/update-ca-bundle.sh",
+            "scripts/vagrant-ssh.sh",
+            "scripts/vboxguest.sh",
+            "scripts/chef.sh",
+            "scripts/compact.sh"
+        ]
+    }]
+}

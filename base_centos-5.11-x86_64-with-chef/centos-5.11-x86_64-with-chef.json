@@ -40,7 +40,6 @@
         "type": "vagrant",
         "keep_input_artifact": false,
         "output": "build/centos-5.11-x86_64-with-chef.box"
-
     },
     {
         "type": "atlas",
@@ -50,7 +49,7 @@
         "artifact_type": "vagrant.box",
         "metadata": {
             "provider": "virtualbox",
-            "version": "0.1.0"
+            "version": "0.1.1"
         }
     }],
     "provisioners": [{
